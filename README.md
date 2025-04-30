@@ -1,4 +1,4 @@
-# ThreatHuntingScript
+# Threat Hunting Script
 
 Requirement is to develop a script using the bash shell, on an Ubuntu 22.04 server system, The script is to be used to aid the SOC Threat hunting team in checking for emerging threats, and gathering information for further processing. An organisation's internal Threat Hunting Team (THT) publishes a daily list of Indicators of Comprom­ ise (loC) on their internal system. Script can be used to search for these loC's along with undertaking other related security checks on the organisations Ubuntu Servers. These are required to run with no interaction or human input.
 
