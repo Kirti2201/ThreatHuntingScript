@@ -3,6 +3,7 @@
 Requirement is to develop a script using the bash shell, on an Ubuntu 22.04 server system, The script is to be used to aid the SOC Threat hunting team in checking for emerging threats, and gathering information for further processing. An organisation's internal Threat Hunting Team (THT) publishes a daily list of Indicators of Comprom­ ise (loC) on their internal system. Script can be used to search for these loC's along with undertaking other related security checks on the organisations Ubuntu Servers. These are required to run with no interaction or human input.
 
 The purpose of script is to execute checks using a given IOC file, along with generating some logs and a report. The outputs of the script are to be uploaded to a central server on completion. The script will be run via crontab between 2 and 3am every day. Output should be kept to a minimum, and limited to statements of pass/fail for each of the checks, as this output will be sent via email, and should be easy to parse for a receiving SOC system. An example direct calling of the script from the command prompt would be:
+
 ./thrhuntscr.sh https://int.iocserver/thr logs.tth.loc.org uploader123
 
 Operating Requirements
