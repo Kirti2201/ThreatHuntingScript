@@ -1,0 +1,113 @@
+Script Overview
+The provided Bash script is designed to perform a series of security-related tasks and system 
+checks. Organization’s Threat Hunting Team (THT) publishes a daily list of Indicators of 
+Compromise (IoC) on their internal system. This script can search for these IoC’s along with 
+undertaking other related security checks on the organizations Ubuntu Servers. These are 
+required to run with no interaction or human input.
+
+The purpose of your script is to execute checks using this IOC file as defined above, along with 
+generating some logs and a report. The outputs of the script are to be uploaded to a central 
+server on completion. The script will be run via crontab between 2 and 3am every day.
+
+Below is an overview of the script's logic and flow:
+
+Script Initialization: The script can run either from command prompt or from Crontab. Sudo 
+is needed to run script from command prompt. The script starts by changing its working 
+directory to /opt/security/working.
+
+Error Handling: The script defines paths for error log files and archives to capture potential 
+issues during execution.
+
+IOC File Download and Validation: The script downloads IOC (Indicator of Compromise) files 
+and their corresponding GPG (GNU Privacy Guard) signatures from a specified URL. GPG is 
+used to verify the integrity of the downloaded IOC file.
+
+IOC File Processing: The script reads the IOC file line by line, interprets commands, and 
+performs corresponding actions. Validations include file hash checks, string matches, and 
+handling invalid lines.
+
+System Checks: The script performs various system checks, such as identifying listening ports, 
+firewall rules, and verifying installed packages. It reports files created or modified in the last 
+48 hours, SUID (Set User ID) files, and SGID (Set Group ID) files.
+
+Executable File Permissions: The script identifies executable files in specified directories and 
+updates their permissions to remove execute permissions.
+
+System Configuration Report: The script captures system configuration for mounted file 
+systems using the mount command and saves the report to a file.
+
+File Archiving: The script archives error logs, listening ports, firewall rules, and system 
+configuration reports into a single compressed file.
+
+File Upload and Verification: The compressed file is signed using GPG and then uploaded to 
+a remote server using “Rsync”. The script validates the uploaded file's GPG signature on the 
+remote server.
+Final Output: The script generates a final output that includes the name, size, and SHA256 
+hash of the uploaded file.
+
+Validation and Errors: Script verify the files using pgp signature at many steps, if it can not 
+verify the signature then exits and does the cleanup. If any errors encountered, then also 
+script exits and does the cleanup after displaying the message in console.
+
+Cleanup: The script performs cleanup tasks, removing temporary directories and files created 
+during execution.
+
+Installation Instructions 
+=========================
+Prerequisites:
+1. Ubuntu: Ensure that the host system to run this script has operating system ubuntu 
+22.04
+2. GPG: The script uses GPG for signature verification. Install GPG using the package 
+manager (apt, yum, or equivalent) for your Linux distribution. All required gpg keys 
+should already be imported in host server and remote server. It is must to have gpg 
+key for tht2023@tht.noroff.no.
+3. Wget and IoC: Install wget to facilitate file downloads. Use the package manager to 
+install these tools. The url from where IoC file is to be downloaded should be accessible 
+from host server and its should have https link.
+4. Sudo Permissions: Ensure that the user running the script has appropriate sudo 
+permissions. The script has many commands that need sudo permission.
+5. SSH Key Pair: Generate an SSH key pair using ssh-keygen if not already created. The 
+public key needs to be copied to the remote server for secure file transfer.
+6. Remote server login: To upload data to remote server ssh id should already be copied 
+in this location /opt/security/useridentity.id, remote system should be accessible from 
+host server by this id using ssh.
+7. Executable: To make this script executable, save it as a file with a .sh extension (e.g.,
+mkdir.sh) and then run the following command:
+sudo chmod +x tth-kamsha68895.sh
+
+How to execute:
+
+1. Running using Crontab: Crontab is a time-based job scheduling utility in Ubuntu
+operating systems. It allows users to schedule tasks (commands or scripts) to run 
+periodically at fixed intervals. Crontab uses a configuration file called a "crontab file" 
+to manage these scheduled tasks.
+
+Install cron if it does not exist -
+sudo apt install cron
+
+Enable cron
+sudo systemctl enable cron
+
+Now open crontab file for editing 
+sudo crontab -e
+
+This will open the crontab file in your default text editor. Add the following line at the 
+end of file to schedule your script to run daily at 2 AM:
+0 2 * * * sudo /opt/security/thtreathuntingscript.sh https://int.iocserver./tth 
+logs.tth.loc.org uploader123
+• Here https://int.iocserver./tth is the https url from where script will 
+download ioc file and its detached signature file.
+• logs.tth.loc.org is the remote server to upload generated tgz file and its 
+detached signature.
+• uploader123 is the user identity to be used to access the remote server
+Save and close crontab.
+When running a script with sudo from cron, you might encounter a situation where it 
+asks for a password. To avoid this, you can configure sudo to not prompt for a 
+password.
+Open the sudoers file for editing using the visudo command.
+sudo visudo
+Add the following line at the end of the sudoers file, replacing username with the 
+actual username:
+username ALL=(ALL) NOPASSWD: /bin/bash /opt/security/tth-kamsha68895.sh
+This line allows the specified user to run the specified script without entering a 
+password. Now save and close it.
